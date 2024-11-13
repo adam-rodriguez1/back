@@ -8,6 +8,6 @@ module.exports = (req, res, next) => {
     req.userId = decodedToken.userId;
     next();
   } catch (error) {
-    res.status(401).json(new Error("Unauthorized"));
+    res.status(403).json(new Error("non authorisé"));
   }
 };

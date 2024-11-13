@@ -7,9 +7,7 @@ const mongoose = require("mongoose");
 exports.getBestRatedBooks = async (req, res) => {
   try {
     const bestRatedBooks = await Book.find().sort({ averageRating: -1 }).limit(3);
-    if (!bestRatedBooks || bestRatedBooks.length === 0) {
-      return res.status(404).json(new Error());
-    }
+
     res.status(200).json(bestRatedBooks);
   } catch (error) {
     res.status(500).json(error);
@@ -29,7 +27,7 @@ exports.getBookById = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
     if (!book) {
-      return res.status(404).json(new Error());
+      return res.status(404).json(new Error("id du livre incorrecte"));
     }
     res.json(book);
   } catch (error) {
@@ -57,13 +55,10 @@ exports.createBook = async (req, res) => {
 exports.deleteBook = async (req, res) => {
   try {
     const bookId = req.params.id;
-    if (!mongoose.Types.ObjectId.isValid(bookId)) {
-      return res.status(400).json(new Error());
-    }
 
     const book = await Book.findById(bookId);
     if (!book) {
-      return res.status(404).json(new Error());
+      return res.status(404).json(new Error("id du livre incorrecte"));
     }
 
     const imagePath = path.join(__dirname, "../uploads", path.basename(book.imageUrl));
@@ -81,14 +76,8 @@ exports.deleteBook = async (req, res) => {
 exports.updateBook = async (req, res) => {
   try {
     const bookId = req.params.id;
-    if (!mongoose.Types.ObjectId.isValid(bookId)) {
-      return res.status(400).json(new Error());
-    }
 
     const book = await Book.findById(bookId);
-    if (!book) {
-      return res.status(404).json(new Error());
-    }
 
     let updatedData = req.body.book ? JSON.parse(req.body.book) : req.body;
     if (req.file) {
@@ -113,25 +102,19 @@ exports.rateBook = async (req, res) => {
     const { userId, rating } = req.body;
     const bookId = req.params.id;
 
-    if (!mongoose.Types.ObjectId.isValid(bookId)) {
-      return res.status(400).json(new Error());
-    }
-
     if (rating < 0 || rating > 5) {
-      return res.status(400).json(new Error());
+      return res.status(400).json(new Error("La note doit être entre 0 et 5"));
     }
 
     const book = await Book.findById(bookId);
-    if (!book) {
-      return res.status(404).json(new Error());
-    }
-
-    if (book.ratings.find((r) => r.userId === userId)) {
-      return res.status(400).json(new Error());
-    }
 
     book.ratings.push({ userId, grade: rating });
-    book.averageRating = book.ratings.reduce((sum, r) => sum + r.grade, 0) / book.ratings.length;
+
+    let totalSum = 0;
+    book.ratings.forEach((rating) => {
+      totalSum += rating.grade;
+    });
+    book.averageRating = Math.round((totalSum / book.ratings.length) * 10) / 10;
 
     await book.save();
     res.status(200).json(book);

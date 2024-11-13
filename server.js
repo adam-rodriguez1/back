@@ -4,7 +4,6 @@ const cors = require("cors");
 const path = require("path");
 const bookRoutes = require("./routes/book.route.js");
 const authRoutes = require("./routes/auth.route.js");
-
 const app = express();
 
 mongoose
