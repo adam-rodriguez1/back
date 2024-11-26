@@ -5,9 +5,9 @@ const path = require("path");
 const bookRoutes = require("./routes/book.route.js");
 const authRoutes = require("./routes/auth.route.js");
 const app = express();
-
+const mongoURI = process.env.MONGO_URI;
 mongoose
-  .connect("mongodb+srv://bob:FqviE6vVZWZSACuJ@coursback.6hzbk.mongodb.net/Projet6", {
+  .connect(mongoURI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

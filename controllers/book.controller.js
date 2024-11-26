@@ -2,7 +2,6 @@ const processImage = require("../middlewares/sharp.middleware.js");
 const fs = require("fs");
 const path = require("path");
 const Book = require("../models/book.model.js");
-const mongoose = require("mongoose");
 
 exports.getBestRatedBooks = async (req, res) => {
   try {
@@ -60,6 +59,9 @@ exports.deleteBook = async (req, res) => {
     if (!book) {
       return res.status(404).json(new Error("id du livre incorrecte"));
     }
+    if (book.userId.toString() !== req.userId) {
+      return res.status(403).json({ message: "Vous n'êtes pas autorisé à supprimer ce livre." });
+    }
 
     const imagePath = path.join(__dirname, "../uploads", path.basename(book.imageUrl));
     if (fs.existsSync(imagePath)) {
@@ -78,6 +80,9 @@ exports.updateBook = async (req, res) => {
     const bookId = req.params.id;
 
     const book = await Book.findById(bookId);
+    if (book.userId.toString() !== req.userId) {
+      return res.status(403).json({ message: "Vous n'êtes pas autorisé à supprimer ce livre." });
+    }
 
     let updatedData = req.body.book ? JSON.parse(req.body.book) : req.body;
     if (req.file) {
@@ -99,26 +104,35 @@ exports.updateBook = async (req, res) => {
 
 exports.rateBook = async (req, res) => {
   try {
-    const { userId, rating } = req.body;
+    const rating = req.body.rating;
+    const userId = req.userId;
     const bookId = req.params.id;
 
     if (rating < 0 || rating > 5) {
-      return res.status(400).json(new Error("La note doit être entre 0 et 5"));
+      return res.status(400).json({ message: "La note doit être entre 0 et 5." });
     }
 
     const book = await Book.findById(bookId);
+    if (!book) {
+      return res.status(404).json({ message: "Livre introuvable." });
+    }
+
+    const existingRating = book.ratings.find((entry) => entry.userId === userId);
+    if (existingRating) {
+      return res.status(400).json({ message: "Vous avez déjà noté ce livre." });
+    }
 
     book.ratings.push({ userId, grade: rating });
 
     let totalSum = 0;
-    book.ratings.forEach((rating) => {
-      totalSum += rating.grade;
+    book.ratings.forEach((entry) => {
+      totalSum += entry.grade;
     });
     book.averageRating = Math.round((totalSum / book.ratings.length) * 10) / 10;
 
     await book.save();
     res.status(200).json(book);
   } catch (error) {
-    res.status(500).json(error);
+    res.status(500).json({ message: "Erreur interne.", error: error.message });
   }
 };
