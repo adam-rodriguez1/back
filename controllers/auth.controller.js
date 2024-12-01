@@ -4,6 +4,7 @@ const User = require("../models/user.model");
 require("dotenv").config();
 const SECRET_KEY = process.env.SECRET_KEY;
 
+//sign-up fonction
 exports.signup = async (req, res) => {
   const { email, password } = req.body;
 
@@ -22,7 +23,7 @@ exports.signup = async (req, res) => {
     res.status(500).json(error);
   }
 };
-
+//log-in fonction
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 

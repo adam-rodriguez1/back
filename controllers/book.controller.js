@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 const Book = require("../models/book.model.js");
 
+// fonction to get the three best rated books
 exports.getBestRatedBooks = async (req, res) => {
   try {
     const bestRatedBooks = await Book.find().sort({ averageRating: -1 }).limit(3);
@@ -12,7 +13,7 @@ exports.getBestRatedBooks = async (req, res) => {
     res.status(500).json(error);
   }
 };
-
+//to get all books
 exports.getAllBooks = async (req, res) => {
   try {
     const books = await Book.find();
@@ -21,7 +22,7 @@ exports.getAllBooks = async (req, res) => {
     res.status(500).json(error);
   }
 };
-
+// to get a book by id
 exports.getBookById = async (req, res) => {
   try {
     const book = await Book.findById(req.params.id);
@@ -33,7 +34,7 @@ exports.getBookById = async (req, res) => {
     res.status(500).json(error);
   }
 };
-
+// to create a new book with a image and average rating set to 0
 exports.createBook = async (req, res) => {
   try {
     const { book } = req.body;
@@ -50,7 +51,7 @@ exports.createBook = async (req, res) => {
     res.status(500).json(error);
   }
 };
-
+// to delete a book
 exports.deleteBook = async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -74,7 +75,7 @@ exports.deleteBook = async (req, res) => {
     res.status(500).json(error);
   }
 };
-
+// to update a book
 exports.updateBook = async (req, res) => {
   try {
     const bookId = req.params.id;
@@ -101,7 +102,7 @@ exports.updateBook = async (req, res) => {
     res.status(500).json(error);
   }
 };
-
+// to rate a book, and average rating
 exports.rateBook = async (req, res) => {
   try {
     const rating = req.body.rating;

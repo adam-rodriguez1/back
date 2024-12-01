@@ -1,5 +1,5 @@
 const multer = require("multer");
-
+// limitation for upload at 2 mo
 const storage = multer.memoryStorage();
 const upload = multer({
   storage: storage,

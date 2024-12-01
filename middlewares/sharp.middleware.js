@@ -2,6 +2,7 @@ const sharp = require("sharp");
 const fs = require("fs");
 const path = require("path");
 
+//sanatization and optimisation
 const processImage = async (fileBuffer, originalName) => {
   if (!fs.existsSync("uploads")) {
     fs.mkdirSync("uploads");
